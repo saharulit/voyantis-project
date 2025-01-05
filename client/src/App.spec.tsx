@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { App } from './App';
 
-// Example test that ensures the page loads successfully
 describe('App Component', () => {
   it('should load the page successfully', () => {
     render(<App />); // Render the component
@@ -15,4 +14,6 @@ describe('App Component', () => {
   // - Checking if the queue is displayed
   // - Verifying the "Go" button is disabled when there are no messages
   // - Ensuring the API response is correctly updated
+  // - Handling the error when the API fails or is unavailable (e.g., ECONNREFUSED)
+  // Make sure to mock the fetch or other API calls to prevent unwanted requests during testing.
 });
