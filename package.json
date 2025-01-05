@@ -1,0 +1,13 @@
+{
+  "name": "express-react-ts-template",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "concurrently \"npm run dev -w server\" \"npm run dev -w client\" ",
+    "test": "concurrently \"npm run test -w server\" \"npm run test -w client\""
+  },
+  "workspaces": ["client", "server"],
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
