@@ -1,40 +1,18 @@
-// import { render, screen, fireEvent } from '@testing-library/react';
-// import { App } from './App';
+import { render, screen } from '@testing-library/react';
+import { App } from './App';
 
-// // כאן אנחנו מחקים את axios כך שלא נצטרך להתחבר לשרת
-// vi.mock('axios', () => ({
-//   get: jest.fn(() =>
-//     Promise.resolve({
-//       data: [
-//         { name: 'Queue 1', messageCount: 3 },
-//         { name: 'Queue 2', messageCount: 5 },
-//       ],
-//     })
-//   ),
-// }));
+// Example test that ensures the page loads successfully
+describe('App Component', () => {
+  it('should load the page successfully', () => {
+    render(<App />); // Render the component
 
-// describe('App Component', () => {
-//   it('renders the queues table correctly', async () => {
-//     render(<App />);
+    // Check if the page title is displayed correctly
+    const titleElement = screen.getByText(/Message Queue System/i);
+    expect(titleElement).toBeInTheDocument(); // Ensure the title is in the document
+  });
 
-//     // מחכים שהטבלה תטען
-//     const queue1 = await screen.findByText('Queue 1');
-//     const queue2 = await screen.findByText('Queue 2');
-
-//     // בודקים אם שמות התורים מוצגים
-//     expect(queue1).toBeInTheDocument();
-//     expect(queue2).toBeInTheDocument();
-//   });
-
-//   it('displays the message when "Go" button is clicked', async () => {
-//     render(<App />);
-
-//     // מחכים שהכפתור "Go" יהיה זמין
-//     const goButton = screen.getByText('Go');
-//     fireEvent.click(goButton);
-
-//     // נוודא שההודעה מוצגת לאחר קליק
-//     const message = await screen.findByText('Message:');
-//     expect(message).toBeInTheDocument();
-//   });
-// });
+  // Note: Additional tests are required, such as:
+  // - Checking if the queue is displayed
+  // - Verifying the "Go" button is disabled when there are no messages
+  // - Ensuring the API response is correctly updated
+});
