@@ -1,63 +1,137 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-interface Friend {
+interface Queue {
   name: string;
-  caricature: string;
-  quote: string;
+  messageCount: number;
 }
 
+interface Message {
+  text: string;
+  timestamp: number;
+  sender?: string;
+}
+
+const API_URL = 'http://localhost:3010/api/que';
+
 export const App: React.FC = () => {
-  const [friends, setFriends] = useState<Friend[]>([]); // State to hold friends data
-  const [loading, setLoading] = useState<boolean>(true); // State to manage loading status
-  const [error, setError] = useState<string | null>(null); // State to manage error status
+  const [queues, setQueues] = useState<Queue[]>([]);
+  const [selectedQueue, setSelectedQueue] = useState<string | null>(null);
+  const [message, setMessage] = useState<Message | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
+  // Fetch all queues
   useEffect(() => {
-    const fetchFriends = async () => {
+    const fetchQueues = async () => {
       try {
-        const response = await fetch('http://localhost:3010/api/friends');
-
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error('Failed to fetch friends');
-        }
-
-        const data: Friend[] = await response.json(); // Parse the JSON from the response
-        setFriends(data); // Update state with friends data
-      } catch (err) {
-        // Check if err is an instance of Error
-        if (err instanceof Error) {
-          setError(err.message); // Update error state if there is an error
-        } else {
-          setError('An unknown error occurred');
-        }
-      } finally {
-        setLoading(false); // Set loading to false after the fetch is complete
+        const response = await axios.get(`${API_URL}/queues`);
+        setQueues(response.data);
+      } catch (error) {
+        console.error('Error fetching queues:', error);
       }
     };
 
-    fetchFriends(); // Call the fetch function
-  }, []); // Empty dependency array means this effect runs once on mount
+    fetchQueues();
+  }, []);
 
-  // Render loading, error, or friends list
-  if (loading) return <div className="text-lg text-gray-700">Loading...</div>;
-  if (error) return <div className="text-lg text-red-500">{error}</div>;
+  // Handle "Go" button click
+  const fetchMessage = async () => {
+    if (!selectedQueue) return;
+
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/${selectedQueue}`);
+      setMessage(response.data || null);
+    } catch (error) {
+      console.error('Error fetching message:', error);
+      setMessage(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold text-blue-500 mb-4">
-        Hello, Tailwind CSS!
+    <div className="min-h-screen bg-gray-50 p-8 flex flex-col items-center">
+      {/* Header */}
+      <h1 className="text-4xl font-bold text-[#002F6C] text-center mb-8">
+        Message Queue System
       </h1>
-      <ul className="space-y-4">
-        {friends.map((friend, index) => (
-          <li key={index} className="p-4 border rounded shadow bg-white">
-            <h2 className="text-xl font-semibold">{friend.name}</h2>
-            <p className="text-gray-700">{friend.caricature}</p>
-            <blockquote className="italic text-gray-500">
-              "{friend.quote}"
-            </blockquote>
-          </li>
-        ))}
-      </ul>
+
+      {/* Queues Table */}
+      <div className="w-full max-w-4xl px-4 mb-8">
+        <h2 className="text-2xl font-semibold text-[#004F91] mb-4">
+          Available Queues
+        </h2>
+        <table className="min-w-full table-auto">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-[#002F6C]">
+                Queue Name
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-[#002F6C]">
+                Message Count
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {queues.map((queue) => (
+              <tr key={queue.name} className="border-t border-[#f0f0f0]">
+                <td
+                  className="px-6 py-4 text-sm text-[#004F91] cursor-pointer hover:text-[#002F6C]"
+                  onClick={() => setSelectedQueue(queue.name)}
+                >
+                  {queue.name}
+                </td>
+                <td className="px-6 py-4 text-sm text-[#004F91]">
+                  {queue.messageCount}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Go Button & Message Display */}
+      {selectedQueue && (
+        <div className="mt-8 w-full max-w-4xl px-4">
+          <button
+            onClick={fetchMessage}
+            className="w-full py-3 bg-[#004F91] text-white text-xl font-semibold rounded-lg hover:bg-[#00356b]"
+          >
+            Go
+          </button>
+
+          {loading && (
+            <p className="mt-4 text-[#004F91] text-center">Loading...</p>
+          )}
+
+          {message && (
+            <div className="mt-6 p-6 bg-white shadow-lg rounded-lg">
+              <p className="text-lg font-semibold text-[#00356b]">
+                <strong>Message:</strong>
+              </p>
+              {Object.keys(message).length === 0 ? (
+                <p>No message content available</p>
+              ) : (
+                Object.keys(message).map((key) => (
+                  <p key={key} className="mt-2 text-sm text-[#6c757d]">
+                    <strong>
+                      {key.charAt(0).toUpperCase() + key.slice(1)}:
+                    </strong>{' '}
+                    {message[key] || 'No data'}
+                  </p>
+                ))
+              )}
+            </div>
+          )}
+
+          {!message && !loading && (
+            <p className="mt-4 text-red-600 text-center">
+              No messages available in this queue.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

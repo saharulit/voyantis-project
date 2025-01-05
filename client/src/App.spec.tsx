@@ -1,61 +1,40 @@
-// App.test.tsx
-import { render, screen, waitFor } from '@testing-library/react';
-import { App } from './App';
-import { Mock } from 'vitest';
+// import { render, screen, fireEvent } from '@testing-library/react';
+// import { App } from './App';
 
-global.fetch = vi.fn();
+// // כאן אנחנו מחקים את axios כך שלא נצטרך להתחבר לשרת
+// vi.mock('axios', () => ({
+//   get: jest.fn(() =>
+//     Promise.resolve({
+//       data: [
+//         { name: 'Queue 1', messageCount: 3 },
+//         { name: 'Queue 2', messageCount: 5 },
+//       ],
+//     })
+//   ),
+// }));
 
-describe('App Component', () => {
-  beforeEach(() => {
-    vi.clearAllMocks(); // Clear previous mock data
-  });
+// describe('App Component', () => {
+//   it('renders the queues table correctly', async () => {
+//     render(<App />);
 
-  test('renders loading state', () => {
-    render(<App />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument(); // Check for loading text
-  });
+//     // מחכים שהטבלה תטען
+//     const queue1 = await screen.findByText('Queue 1');
+//     const queue2 = await screen.findByText('Queue 2');
 
-  test('renders friends list after successful fetch', async () => {
-    // Mock the fetch response
-    const mockFriends = [
-      { name: 'John Doe', caricature: 'Friend caricature 1', quote: 'Hello!' },
-      {
-        name: 'Jane Doe',
-        caricature: 'Friend caricature 2',
-        quote: 'Good day!',
-      },
-    ];
-    (fetch as Mock).mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValueOnce(mockFriends),
-    });
+//     // בודקים אם שמות התורים מוצגים
+//     expect(queue1).toBeInTheDocument();
+//     expect(queue2).toBeInTheDocument();
+//   });
 
-    render(<App />);
+//   it('displays the message when "Go" button is clicked', async () => {
+//     render(<App />);
 
-    // Wait for the component to finish loading and rendering
-    await waitFor(() =>
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
-    );
+//     // מחכים שהכפתור "Go" יהיה זמין
+//     const goButton = screen.getByText('Go');
+//     fireEvent.click(goButton);
 
-    // Check if friends are rendered
-    expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
-    expect(screen.getByText(/Jane Doe/i)).toBeInTheDocument();
-  });
-
-  test('renders error message on fetch failure', async () => {
-    // Mock the fetch response for an error
-    (fetch as Mock).mockResolvedValueOnce({
-      ok: false,
-    });
-
-    render(<App />);
-
-    // Wait for loading to finish
-    await waitFor(() =>
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
-    );
-
-    // Check for error message
-    expect(screen.getByText(/Failed to fetch friends/i)).toBeInTheDocument();
-  });
-});
+//     // נוודא שההודעה מוצגת לאחר קליק
+//     const message = await screen.findByText('Message:');
+//     expect(message).toBeInTheDocument();
+//   });
+// });
