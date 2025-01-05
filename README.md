@@ -25,7 +25,7 @@
   
 3. Start Development:
     * You can now start the project: ```npm run start```
-    * Open your browser and navigate to http://localhost:3010 to see the project in action.
+    * Open your browser and navigate to http://localhost:5173 to see the project in action.
 
 - **Client**: Runs on `http://localhost:5173`
 - **Server**: Runs on `http://localhost:3010`
