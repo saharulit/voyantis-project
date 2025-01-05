@@ -21,27 +21,42 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   // Fetch all queues
-  useEffect(() => {
-    const fetchQueues = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/queues`);
-        setQueues(response.data);
-      } catch (error) {
-        console.error('Error fetching queues:', error);
-      }
-    };
+  const fetchQueues = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/queues`);
+      setQueues(response.data);
+    } catch (error) {
+      console.error('Error fetching queues:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchQueues();
-  }, []);
+  }, [message]);
 
   // Handle "Go" button click
   const fetchMessage = async () => {
-    if (!selectedQueue) return;
+    if (
+      !selectedQueue ||
+      queues.find((queue) => queue.name === selectedQueue)?.messageCount === 0
+    ) {
+      // Prevent fetching message if there are no messages in the selected queue
+      return;
+    }
 
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/${selectedQueue}`);
       setMessage(response.data || null);
+
+      // Update the queue's message count after fetching a message
+      setQueues((prevQueues) =>
+        prevQueues.map((queue) =>
+          queue.name === selectedQueue
+            ? { ...queue, messageCount: queue.messageCount - 1 }
+            : queue
+        )
+      );
     } catch (error) {
       console.error('Error fetching message:', error);
       setMessage(null);
@@ -96,7 +111,16 @@ export const App: React.FC = () => {
         <div className="mt-8 w-full max-w-4xl px-4">
           <button
             onClick={fetchMessage}
-            className="w-full py-3 bg-[#004F91] text-white text-xl font-semibold rounded-lg hover:bg-[#00356b]"
+            className={`w-full py-3 text-xl font-semibold rounded-lg ${
+              queues.find((queue) => queue.name === selectedQueue)
+                ?.messageCount === 0
+                ? 'bg-gray-500 cursor-not-allowed'
+                : 'bg-[#004F91] text-white hover:bg-[#00356b]'
+            }`}
+            disabled={
+              queues.find((queue) => queue.name === selectedQueue)
+                ?.messageCount === 0
+            }
           >
             Go
           </button>
@@ -123,12 +147,6 @@ export const App: React.FC = () => {
                 ))
               )}
             </div>
-          )}
-
-          {!message && !loading && (
-            <p className="mt-4 text-red-600 text-center">
-              No messages available in this queue.
-            </p>
           )}
         </div>
       )}
